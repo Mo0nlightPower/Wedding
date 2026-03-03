@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alvin 和 Kiki的婚禮相簿</title>
+    <style>
+        /* 氣質風格基礎設定 */
+        body {
+            font-family: 'Noto Serif TC', 'Times New Roman', serif;
+            background-color: #FBF9F6; /* 溫潤米白底色 */
+            color: #4A4036; /* 深褐灰文字 */
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 色塊與線條裝飾的頂部視覺 */
+        .hero-section {
+            background-color: #F3EBE1; /* 莫蘭迪裸粉色塊 */
+            margin: 40px auto;
+            max-width: 90%;
+            width: 600px;
+            padding: 50px 20px;
+            text-align: center;
+            border: 1px solid #D1C0A8; /* 雅緻金屬質感線條 */
+            position: relative;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 1px solid rgba(209, 192, 168, 0.4); /* 內層細線增加層次 */
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            letter-spacing: 4px;
+            font-weight: normal;
+            margin: 0 0 10px 0;
+        }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            color: #7A6B5D;
+        }
+
+        /* 瀑布流相片牆設計 */
+        .gallery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            /* 使用 column-count 創造錯落有致的視覺感 */
+            column-count: 2;
+            column-gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .gallery-container { column-count: 3; }
+        }
+
+        @media (min-width: 1024px) {
+            .gallery-container { column-count: 4; }
+        }
+
+        .gallery-item {
+            break-inside: avoid;
+            margin-bottom: 15px;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 2px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero-section">
+        <h1>OUR WEDDING</h1>
+        <p class="subtitle">Alvin & Kiki</p>
+    </div>
+    
+    <div class="gallery-container" id="photo-gallery">
+        </div>
+
+    <script>
+        // 設定照片總數
+        const totalPhotos = 103;
+        const gallery = document.getElementById('photo-gallery');
+
+        // 自動生成 103 張照片的 HTML 結構
+        for(let i = 1; i <= totalPhotos; i++) {
+            const div = document.createElement('div');
+            div.className = 'gallery-item';
+            
+            const img = document.createElement('img');
+            // 檔名設定為 photo_1.jpg 到 photo_103.jpg
+            img.src = `image/image_ (${i}).JPG`; 
+            // 啟用延遲載入，滑到哪才載入到哪，節省 90% 以上的初期流量
+            img.loading = 'lazy'; 
+            img.alt = `Wedding Photo ${i}`;
+            
+            div.appendChild(img);
+            gallery.appendChild(div);
+        }
+    </script>
+</body>
+</html>
