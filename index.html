@@ -8,29 +8,32 @@
         /* 氣質風格基礎設定 */
         body {
             font-family: 'Noto Serif TC', 'Times New Roman', serif;
-            background-color: #FBF9F6; /* 溫潤米白底色 */
-            color: #4A4036; /* 深褐灰文字 */
+            background-color: #FBF9F6;
+            color: #4A4036;
             margin: 0;
             padding: 0;
         }
 
-        /* 色塊與線條裝飾的頂部視覺 */
-        .hero-section {
-            background-color: #F3EBE1; /* 莫蘭迪裸粉色塊 */
-            margin: 40px auto;
-            max-width: 90%;
-            width: 600px;
-            padding: 50px 20px;
+        /* --- 頂部標題區：固定、毛玻璃與動態縮小 --- */
+        .header-container {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(251, 249, 246, 0.85); /* 半透明底色 */
+            backdrop-filter: blur(12px); /* 氣質毛玻璃效果 */
+            -webkit-backdrop-filter: blur(12px); /* 支援 iOS */
+            padding: 40px 20px;
             text-align: center;
-            border: 1px solid #D1C0A8; /* 雅緻金屬質感線條 */
-            position: relative;
+            border-bottom: 1px solid transparent;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* 平滑過渡動畫 */
         }
 
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 10px; left: 10px; right: 10px; bottom: 10px;
-            border: 1px solid rgba(209, 192, 168, 0.4); /* 內層細線增加層次 */
+        /* 滾動後的標題狀態 */
+        .header-container.scrolled {
+            padding: 12px 20px;
+            background-color: rgba(251, 249, 246, 0.95);
+            border-bottom: 1px solid rgba(209, 192, 168, 0.5);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
         }
 
         h1 {
@@ -38,52 +41,69 @@
             letter-spacing: 4px;
             font-weight: normal;
             margin: 0 0 10px 0;
+            transition: all 0.4s ease;
+        }
+
+        .header-container.scrolled h1 {
+            font-size: 1.1rem;
+            margin: 0 0 4px 0;
+            letter-spacing: 3px;
         }
 
         p.subtitle {
             font-size: 0.9rem;
             letter-spacing: 2px;
             color: #7A6B5D;
+            margin: 0;
+            transition: all 0.4s ease;
         }
 
-        /* ---------------------------------------------------
-           單欄相片牆設計 (本次更新重點)
-           --------------------------------------------------- */
+        .header-container.scrolled p.subtitle {
+            font-size: 0.75rem;
+        }
+
+        /* --- 單欄相片牆與效能優化 --- */
         .gallery-container {
-            /* 將最大寬度限制在 600px，確保在電腦大螢幕上照片不會過度放大變形 */
             max-width: 600px; 
-            margin: 0 auto;
-            padding: 20px;
-            
-            /* 採用 Flexbox 達成絕對的單欄垂直排列 */
+            margin: 20px auto 60px auto;
+            padding: 0 20px;
             display: flex;
             flex-direction: column;
-            gap: 40px; /* 增加照片之間的留白，提升呼吸感與氣質 */
-            align-items: center; /* 確保所有照片置中對齊 */
+            gap: 40px;
+            align-items: center;
         }
 
         .gallery-item {
             width: 100%;
+            /* 效能關鍵：預先撐開 4.5:3 (約 2:3) 的直式空間，防止高度塌陷 */
+            aspect-ratio: 2 / 3; 
+            background-color: #F3EBE1; /* 莫蘭迪裸粉作為載入前的骨架屏 */
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
         }
 
         .gallery-item img {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover; /* 確保照片不變形，填滿容器 */
             display: block;
-            border-radius: 4px; /* 稍微增加圓角，讓視覺更柔和 */
-            box-shadow: 0 6px 16px rgba(0,0,0,0.06); /* 強化陰影，增加立體相框感 */
-            transition: transform 0.3s ease;
+            opacity: 0; /* 初始透明 */
+            transform: scale(1.05); /* 稍微放大，搭配淡入縮小的動畫感 */
+            transition: opacity 0.8s ease, transform 0.8s ease;
         }
 
-        /* 點綴：滑鼠游標懸浮時的微放大效果 */
-        .gallery-item img:hover {
-            transform: scale(1.02);
+        /* 圖片載入完成後由 JS 加入的類別 */
+        .gallery-item img.loaded {
+            opacity: 1;
+            transform: scale(1);
         }
     </style>
 </head>
 <body>
 
-    <div class="hero-section">
+    <div class="header-container" id="main-header">
         <h1>OUR WEDDING</h1>
         <p class="subtitle">Alvin & Kiki</p>
     </div>
@@ -92,20 +112,33 @@
         </div>
 
     <script>
-        // 設定照片總數
+        // 1. 處理標題滾動縮小特效
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 30) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // 2. 處理相片生成與平滑淡入
         const totalPhotos = 103;
         const gallery = document.getElementById('photo-gallery');
 
-        // 自動生成 103 張照片的 HTML 結構
         for(let i = 1; i <= totalPhotos; i++) {
             const div = document.createElement('div');
             div.className = 'gallery-item';
             
             const img = document.createElement('img');
-            // 對應你目前上傳至 GitHub 的檔名規則
             img.src = `image/image_${i}.jpg`; 
-            img.loading = 'lazy'; 
+            img.loading = 'lazy'; // 原生延遲載入機制
             img.alt = `Wedding Photo ${i}`;
+            
+            // 監聽圖片是否下載完成，完成後加上 loaded 類別觸發 CSS 動畫
+            img.onload = () => {
+                img.classList.add('loaded');
+            };
             
             div.appendChild(img);
             gallery.appendChild(div);
