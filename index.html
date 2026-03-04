@@ -46,36 +46,38 @@
             color: #7A6B5D;
         }
 
-        /* 瀑布流相片牆設計 */
+        /* ---------------------------------------------------
+           單欄相片牆設計 (本次更新重點)
+           --------------------------------------------------- */
         .gallery-container {
-            max-width: 1200px;
+            /* 將最大寬度限制在 600px，確保在電腦大螢幕上照片不會過度放大變形 */
+            max-width: 600px; 
             margin: 0 auto;
             padding: 20px;
-            /* 使用 column-count 創造錯落有致的視覺感 */
-            column-count: 2;
-            column-gap: 15px;
-        }
-
-        @media (min-width: 768px) {
-            .gallery-container { column-count: 3; }
-        }
-
-        @media (min-width: 1024px) {
-            .gallery-container { column-count: 4; }
+            
+            /* 採用 Flexbox 達成絕對的單欄垂直排列 */
+            display: flex;
+            flex-direction: column;
+            gap: 40px; /* 增加照片之間的留白，提升呼吸感與氣質 */
+            align-items: center; /* 確保所有照片置中對齊 */
         }
 
         .gallery-item {
-            break-inside: avoid;
-            margin-bottom: 15px;
+            width: 100%;
         }
 
         .gallery-item img {
             width: 100%;
             height: auto;
             display: block;
-            border-radius: 2px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            transition: opacity 0.5s ease-in-out;
+            border-radius: 4px; /* 稍微增加圓角，讓視覺更柔和 */
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06); /* 強化陰影，增加立體相框感 */
+            transition: transform 0.3s ease;
+        }
+
+        /* 點綴：滑鼠游標懸浮時的微放大效果 */
+        .gallery-item img:hover {
+            transform: scale(1.02);
         }
     </style>
 </head>
@@ -100,9 +102,8 @@
             div.className = 'gallery-item';
             
             const img = document.createElement('img');
-            // 檔名設定為 photo_1.jpg 到 photo_103.jpg
-            img.src = `./image/image_${i}.jpg`; 
-            // 啟用延遲載入，滑到哪才載入到哪，節省 90% 以上的初期流量
+            // 對應你目前上傳至 GitHub 的檔名規則
+            img.src = `image/image_${i}.jpg`; 
             img.loading = 'lazy'; 
             img.alt = `Wedding Photo ${i}`;
             
@@ -111,7 +112,4 @@
         }
     </script>
 </body>
-
 </html>
-
-
